@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>ZIM - Penguins</title>
+
+<!-- Welcome to ZIM at https://zimjs.com - Code Creativity!                              -->
+<!-- ZIM runs on the HTML Canvas powered by JavaScript and CreateJS https://createjs.com -->
+<!-- Founded by Inventor Dan Zen - http://danzen.com - Canadian New Media Award Winner   -->
+<!-- ZIM is free to use. You can donate to help improve ZIM at https://zimjs.com/donate  -->
+
+<script src="https://zimjs.org/cdn/1.2.3/createjs_min.js"></script>
+<script src="https://zimjs.org/cdn/10.7.1/zim.js"></script>
+<!-- use zimjs.com/distill for minified individual functions! -->
+
+<script>
+
+// SCALING OPTIONS
+// scaling can have values as follows with full being the default
+// "fit"	sets canvas and stage to dimensions and scales to fit inside window size
+// "outside"	sets canvas and stage to dimensions and scales to fit outside window size
+// "full"	sets stage to window size with no scaling
+// "tagID"	add canvas to HTML tag of ID - set to dimensions if provided - no scaling
+
+const scaling = "fit"; // this will resize to fit inside the screen dimensions
+const width = 1024;
+const height = 768;
+const color = "#b3d9ff"; // ZIM colors like green, blue, pink, faint, clear, etc.
+const outerColor = dark; // any HTML colors like "violet", "#333", etc. are fine to use
+
+const frame = new Frame(scaling, width, height, color, outerColor);
+frame.on("ready", () => { // ES6 Arrow Function - like function(){}
+    zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
+
+    const stage = frame.stage;
+    let stageW = frame.width;
+    let stageH = frame.height;
+
+    // put your code here (you can delete this sample code)
+
+    //floor
+    const floor = new Rectangle(stageW, 42, brown, black, 3).addTo(stage).pos(0,0,CENTER,BOTTOM);
+
+    var penguin = new Circle(35, black).center(stage).pos(0, 200, CENTER, BOTTOM);
+
+    //penguin feet
+    var penguinLeftFoot = new Triangle(40, 50, 50, "orange", "black", 3)
+    .center(penguin)
+    .mov(-20, 170);
+
+    var penguinRightFoot = new Triangle(40, 50, 50, "orange", "black", 3)
+    .center(penguin)
+    .mov(20, 170);
+
+    //penguin body
+    var penguinBody = new Rectangle(100, 150, black, undefined, undefined, [50, 50, 55, 55])
+    .addTo(penguin)
+    .center(penguin)
+    .mov(0, 100);
+
+    //white circle on head of penguin
+    var penguinFace = new Rectangle(54, 54, white, black, 1, [27, 27, 27, 27])
+    .addTo(penguin)
+    .centerReg()
+    .mov(0, -8);
+
+    //penguin's beak
+    var penguinBeak = new Triangle(30, 40, 40, "orange", "black", 3)
+    .center(penguin)
+    .mov(0, -45);
+
+    //penguin's eyes
+    var penguinEyeLeft = new Circle(6, black)
+    .addTo(penguin)
+    .centerReg()
+    .mov(10, -6);
+
+    var penguinEyeRight = new Circle(6, black)
+    .addTo(penguin)
+    .centerReg()
+    .mov(-10, -6);
+
+    //penguins wings
+    var penguinWingLeft = new Rectangle(25, 120, black, undefined, undefined, [12, 12, 15, 15])
+    .addTo(penguin)
+    .centerReg()
+    .rot(30)
+    .mov(-55, 100);
+
+    var penguinWingLeft = new Rectangle(25, 120, black, undefined, undefined, [12, 12, 15, 15])
+    .addTo(penguin)
+    .centerReg()
+    .rot(-30)
+    .mov(55, 100);
+
+    //looping falling acid rain
+     const acidRainHolder = new Container(stageW, stageH).addTo();
+
+     var rainLoop = interval({min:1000, max:2000}, () => {
+         new Triangle(60, 70, 70, "green", "black", 3)
+         .centerReg(acidRainHolder)
+         .loc(rand(stageW),-100)
+         .animate({
+             time:1000,
+             loop:true,
+             ease:"linear"
+         })
+         .animate({
+             props:{y:stageH+100},
+             time:2000,
+             ease:"linear",
+             call:(target) => {
+                 target.removeFrom();
+             }
+         });
+     }, undefined, true);
+
+     //looping falling fish
+      const fishHolder = new Container(stageW, stageH).addTo();
+
+      var fishLoop = interval({min:1000, max:2000}, () => {
+          new Rectangle(50, 120, grey, black, 3, [70, 70, 28, 28])
+          .centerReg(fishHolder)
+          .loc(rand(stageW),-100)
+          .animate({
+             props:{rotation:360},
+             time: 3000,
+             loop:true,
+             ease:"linear"
+         })
+         .animate({
+             props:{y:stageH+100},
+             time: 4000,
+             ease:"linear",
+             call:(target) => {
+                 target.removeFrom();
+             }
+         });
+     }, undefined, true);
+
+     //adding clouds
+     var cloudCircle1 = new Circle (200, white).centerReg().pos(-300, -250, TOP);
+     var cloudCircle2 = new Circle (200, white).pos(-50, -250, TOP);
+     var cloudCircle3 = new Circle (200, white).pos(200, -250, TOP);
+     var cloudCircle4 = new Circle (200, white).pos(450, -250, TOP);
+     var cloudCircle5 = new Circle (200, white).pos(700, -250, TOP);
+
+     //make lives
+       const life1 = new Circle(30, pink, black, 3).pos(40, 30, TOP, LEFT);
+       const life2 = new Circle(30, pink, black, 3).pos(130, 30, TOP, LEFT);
+       const life3 = new Circle(30, pink, black, 3).pos(220, 30, TOP, LEFT);
+       const lives = [life1, life2, life3];
+
+      //leaderboard
+      let total = 0;
+      const leaderboard = new Label({
+          text: total,
+          size: 120,
+          font: "Courier New",
+          fontOptions: "bold",
+          })
+          .centerReg()
+          .pos(100, 20, RIGHT)
+          .reg();
+
+     //moving penguin function
+     var controller = new MotionController({
+         target:penguin,
+         type:"keydown",
+         axis: "horizontal",
+         boundary: stage
+     });
+
+     //loser text
+     const loserMessage = new Label({
+         text: "LOSER!",
+         size: 250,
+         font: "Courier New",
+         fontOptions: "bold",
+     });
+
+     //hit test for acid rain
+     //life removal
+     var i = 0;
+      Ticker.add(() => {
+          acidRainHolder.loop(acidRain => {
+              if(acidRain.hitTestRect(penguinBeak)){
+                  acidRain.stopAnimate();
+                  acidRain.removeFrom();
+                  if(i<lives.length){
+                      lives[i].removeFrom();
+                      i++;
+                      if(i>2){
+                            zim.stopAnimate();
+                              zog("Loser!");
+                              fishLoop.clear();
+                              rainLoop.clear();
+                              loserMessage.centerReg();
+                      }
+                  }
+              }
+          });
+      });
+
+      //winner text
+      const winnerMessage = new Label({
+          text: "WINNER!",
+          size: 250,
+          font: "Courier New",
+          fontOptions: "bold",
+      });
+
+      //hit test for fish
+       Ticker.add(() => {
+           fishHolder.loop(fish => {
+               if(fish.hitTestRect(penguinBeak)){
+                   leaderboard.text = ++total;
+                   fish.stopAnimate();
+                   fish.removeFrom();
+                   if(total>=30){
+                       zim.stopAnimate();
+                       zog("Winner!");
+                       fishLoop.clear();
+                       rainLoop.clear();
+                       winnerMessage.centerReg();
+                   }
+               }
+           });
+       });
+
+    stage.update(); // this is needed to show any changes
+
+}); // end of ready
+
+</script>
+
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+
+</head>
+
+<body>
+<!-- canvas with id="myCanvas" is made by zim Frame -->
+</body>
+</html>
